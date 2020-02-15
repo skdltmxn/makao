@@ -2,19 +2,18 @@
 
 'use strict';
 
-require('dotenv').config();
+const Config = require('../config');
 const crypto = require('crypto');
-const version = require('./version');
+const { version } = require('./version');
 
-const generateUuid = (userid) => {
+const generateDeviceUuid = () => {
     return crypto.createHash('sha512')
-        .update(userid)
-        .update(process.env.DEVICE_UUID_SEED)
+        .update(Config.DEVICE_UUID_SEED)
         .digest('base64');
 }
 
 const generateXvc = (userid) => {
-    const uuid = generateUuid(userid);
+    const uuid = generateDeviceUuid();
     return crypto.createHash('sha512')
         .update(`HEATH|KT/${version} Wd/10.0 ko|DEMIAN|${userid}|${uuid}`)
         .digest('hex')
@@ -22,6 +21,6 @@ const generateXvc = (userid) => {
 }
 
 module.exports = {
-    generateUuid,
+    generateDeviceUuid,
     generateXvc,
 }

@@ -1,24 +1,15 @@
 const bson = require('bson');
 const tls = require('tls');
+const { LocoPacket, LocoPacketBuilder } = require('../kakao/lib/packet');
 
 (async () => {
-    const bsonReq = bson.serialize({
-        MCCMNC: '999',
-        os: '10.0',
-        simMCCMNC: '999',
-    });
+    const req = new LocoPacketBuilder('GETCONF')
+        .add('MCCMNC', '999')
+        .add('os', '10.0')
+        .add('simMCCMNC', '999')
+        .final();
 
-    const header = Buffer.allocUnsafe(22);
-    header.fill(0, 0, 22);
-    header.writeUInt32LE(0, 0); // packet ID
-    header.writeUInt16LE(0, 4);
-    header.write('GETCONF', 6, 'utf-8');
-    header.writeUInt8(0, 17);
-    header.writeUInt32LE(bsonReq.length, 18);
-
-    const req = Buffer.allocUnsafe(22 + bsonReq.length);
-    header.copy(req);
-    bsonReq.copy(req, 22);
+    console.log(req);
 
     const host = 'booking-loco.kakao.com';
     const port = 443;
@@ -30,8 +21,9 @@ const tls = require('tls');
     });
 
     conn.on('data', data => {
-        const res = bson.deserialize(data.slice(22));
-        console.log(res);
+        const packet = LocoPacket.from(data);
+        //const res = bson.deserialize(data.slice(22));
+        console.log(packet);
     });
 
     conn.on('end', _ => {

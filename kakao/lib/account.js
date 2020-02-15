@@ -2,11 +2,11 @@
 
 'use strict';
 
-require('dotenv').config();
+const Config = require('../../config');
 const axios = require('axios');
 const qs = require('querystring');
-const version = require('../version');
-const { generateXvc, generateUuid } = require('../util');
+const { version } = require('../version');
+const { generateXvc, generateDeviceUuid } = require('../util');
 
 class AccountManager {
     constructor(userid, password) {
@@ -30,9 +30,10 @@ class AccountManager {
         const params = qs.stringify({
             'email': this.userid,
             'password': this.password,
-            'device_uuid': generateUuid(this.userid),
-            'device_name': process.env.DEVICE_NAME || 'MY_PC',
+            'device_uuid': generateDeviceUuid(),
+            'device_name': Config.DEVICE_NAME || 'MY_PC',
             'os_version': '10.0',
+            'permanent': 'true',
         });
 
         const res = await this.wc.post('/win32/account/login.json', params);
@@ -43,8 +44,9 @@ class AccountManager {
         const params = qs.stringify({
             'email': this.userid,
             'password': this.password,
-            'device_uuid': generateUuid(this.userid),
-            'device_name': process.env.DEVICE_NAME || 'MY_PC',
+            'device_uuid': generateDeviceUuid(),
+            'device_name': Config.DEVICE_NAME || 'MY_PC',
+            'permanent': 'true',
         });
 
         const res = await this.wc.post('/win32/account/request_passcode.json', params);
@@ -55,9 +57,10 @@ class AccountManager {
         const params = qs.stringify({
             'email': this.userid,
             'password': this.password,
-            'device_uuid': generateUuid(this.userid),
+            'device_uuid': generateDeviceUuid(),
             'passcode': passcode,
-            'device_name': process.env.DEVICE_NAME || 'MY_PC',
+            'device_name': Config.DEVICE_NAME || 'MY_PC',
+            'permanent': 'true',
         });
 
         const res = await this.wc.post('/win32/account/register_device.json', params);

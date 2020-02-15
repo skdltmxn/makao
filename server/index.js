@@ -2,10 +2,9 @@
 
 'use strict';
 
-require('dotenv').config();
+const Config = require('../config');
 const express = require('express');
 const { KakaoClient } = require('kakao');
-const port = 4000;
 
 class MakaoServer {
     constructor() {
@@ -21,11 +20,6 @@ class MakaoServer {
             res.send(loginRes);
         });
 
-        this.app.get('/request/passcode', async (_, res) => {
-            const reqRes = await this.client.requestPasscode();
-            res.send(reqRes);
-        });
-
         this.app.get('/register/device/:passcode', async (req, res) => {
             const regRes = await this.client.registerDevice(req.params.passcode);
             res.send(regRes);
@@ -33,8 +27,8 @@ class MakaoServer {
     }
 
     start() {
+        const port = Config.MAKAO_API_SERVER_PORT;
         this.app.listen(port, async () => {
-            //await kakao.login(process.env.USER_ID, process.env.PASSWORD);
             console.log(`🚀 makao server is listening on ${port}`);
         })
     }
