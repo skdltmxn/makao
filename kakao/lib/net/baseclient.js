@@ -2,11 +2,11 @@
 
 'use strict';
 
-const EventEmitter = require('events');
+const EventEmitter2 = require('eventemitter2').EventEmitter2;
 
-class BaseClient extends EventEmitter {
+class BaseClient extends EventEmitter2 {
     constructor(conn) {
-        super();
+        super({ wildcard: true });
         this.conn = conn;
     }
 

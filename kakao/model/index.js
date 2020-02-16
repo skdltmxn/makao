@@ -3,7 +3,9 @@
 'use strict';
 
 const UserInfo = require('./user');
+const MsgInfo = require('./msg');
 
 module.exports = {
-    UserInfo
+    UserInfo,
+    MsgInfo,
 };

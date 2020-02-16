@@ -6,7 +6,7 @@ const Config = require('../config');
 const AccountManager = require('./lib/account');
 const Cryptor = require('./lib/cryptor');
 const errCodeString = require('./lib/error');
-const { UserInfo } = require('./model');
+const { UserInfo, MsgInfo } = require('./model');
 const BookingClient = require('./booking');
 const TicketClient = require('./ticket');
 const CarriageClient = require('./carriage');
@@ -22,7 +22,16 @@ class KakaoClient {
 
     async loginCarriage(host, port) {
         const carriageClient = new CarriageClient(host, port, this.userInfo);
-        carriageClient.on('LOGINLIST', body => console.log(body));
+        carriageClient.onAny((event, value) => {
+            value.method = event;
+            console.log(value);
+        });
+        //carriageClient.on('LOGINLIST', body => console.log(body));
+        carriageClient.on('MSG', async body => {
+            const msgInfo = new MsgInfo(body);
+            console.log(msgInfo);
+            await this.sendMsg(msgInfo.chatId, msgInfo.message);
+        });
         await carriageClient.connect();
         await carriageClient.loginList();
 
@@ -80,7 +89,12 @@ class KakaoClient {
         return res;
     }
 
+    async sendMsg(chatId, msg) {
+        if (!this.carriageClient.isConnected())
+            throw new Error('not connected to server');
 
+        await this.carriageClient.sendMsg(chatId, msg);
+    }
 }
 
 module.exports = KakaoClient;

@@ -35,6 +35,21 @@ class CarriageClient extends LocoClient {
 
         await this.write(req);
     }
+
+    async sendMsg(chatId, msg, type) {
+        const req = new LocoPacketBuilder('WRITE')
+            .add('chatId', chatId)
+            .add('msg', msg)
+            .add('msgId', bson.Long.ZERO)
+            .add('type', type)
+            .final();
+
+        await this.write(req);
+    }
+
+    async sendTextMsg(chatId, msg) {
+        await this.sendMsg(chatId, msg, 1);
+    }
 }
 
 module.exports = CarriageClient;
