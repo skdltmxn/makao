@@ -2,6 +2,7 @@
 
 'use strict';
 
+const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const Config = require('../config');
 const AccountManager = require('./lib/account');
 const Cryptor = require('./lib/cryptor');
@@ -11,8 +12,9 @@ const BookingClient = require('./booking');
 const TicketClient = require('./ticket');
 const CarriageClient = require('./carriage');
 
-class KakaoClient {
+class KakaoClient extends EventEmitter2 {
     constructor() {
+        super();
         this.userid = Config.USER_ID;
         this.accountMgr = new AccountManager(this.userid, Config.PASSWORD);
         this.cryptor = new Cryptor();
@@ -24,13 +26,12 @@ class KakaoClient {
         const carriageClient = new CarriageClient(host, port, this.userInfo);
         carriageClient.onAny((event, value) => {
             value.method = event;
-            console.log(value);
+            //console.log(value);
         });
         //carriageClient.on('LOGINLIST', body => console.log(body));
         carriageClient.on('MSG', async body => {
             const msgInfo = new MsgInfo(body);
-            console.log(msgInfo);
-            await this.sendMsg(msgInfo.chatId, msgInfo.message);
+            await this.emitAsync('makao.MSG', msgInfo);
         });
         await carriageClient.connect();
         await carriageClient.loginList();

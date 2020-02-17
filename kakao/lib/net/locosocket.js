@@ -2,11 +2,11 @@
 
 'use strict';
 
-const EventEmitter = require('events');
+const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const net = require('net');
 const { LocoPacket, LocoPacketDataTooShort } = require('../packet');
 
-class LocoSocket extends EventEmitter {
+class LocoSocket extends EventEmitter2 {
     constructor(host, port, cryptor) {
         super();
         this.host = host;

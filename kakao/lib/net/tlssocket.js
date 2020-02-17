@@ -3,10 +3,10 @@
 'use strict';
 
 const tls = require('tls');
-const EventEmitter = require('events');
-const { LocoPacket, LocoPacketDataTooShort } = require('../packet');
+const EventEmitter2 = require('eventemitter2').EventEmitter2;
+const { LocoPacket } = require('../packet');
 
-class TlsSocket extends EventEmitter {
+class TlsSocket extends EventEmitter2 {
     constructor(host, port) {
         super();
         this.host = host;
