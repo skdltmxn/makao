@@ -22,7 +22,7 @@ class LocoSocket extends EventEmitter2 {
 
     async connect() {
         this.conn = net.connect(this.port, this.host, async () => {
-            this.conn.on('data', data => this.tryParse(data));
+            this.conn.on('data', async data => await this.tryParse(data));
         });
 
         await this.handshake();
@@ -57,7 +57,7 @@ class LocoSocket extends EventEmitter2 {
         await this.write(packet);
     }
 
-    tryParse(data) {
+    async tryParse(data) {
         try {
             data = Buffer.concat([this.buffer, data]);
 
@@ -70,7 +70,7 @@ class LocoSocket extends EventEmitter2 {
                 const payload = this.cryptor.aesDecrypt(data.slice(20, len + 4), iv);
                 const packet = LocoPacket.from(payload);
                 
-                this.emit('packet', packet);
+                await this.emitAsync('packet', packet);
                 data = data.slice(len + 4);
             }
         } catch (e) {

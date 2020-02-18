@@ -2,8 +2,8 @@
 
 'use strict';
 
-const EchoService = require('./echo');
+const ServiceManager = require('./manager');
 
 module.exports = {
-    EchoService,
+    ServiceManager,
 }

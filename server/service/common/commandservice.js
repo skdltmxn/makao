@@ -8,10 +8,23 @@ class CommandService extends BaseService {
     constructor(kakaoClient, trigger) {
         super(kakaoClient);
 
-        this.on(`cmd.${trigger}`, msgInfo => {
+        this.trigger = trigger;
+        this.on(`cmd.${trigger}`, async msgInfo => {
             const args = msgInfo.message.split(/\s+/).splice(1);
-            this.onTrigger(msgInfo, args);
+
+            try {
+                await this.onTrigger(msgInfo, args);
+            } catch (e) {
+                kakaoClient.sendMsg(
+                    msgInfo.chatId,
+                    e.message
+                );
+            }
         })
+    }
+
+    serviceTrigger() {
+        return this.trigger;
     }
 }
 

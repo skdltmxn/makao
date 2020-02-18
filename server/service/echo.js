@@ -6,8 +6,12 @@ const CommandService = require('./common/commandservice');
 
 class EchoService extends CommandService {
     constructor(kakaoClient) {
-        super(kakaoClient, '에코');
+        super(kakaoClient, '>');
         this.kakaoClient = kakaoClient;
+    }
+
+    description() {
+        return '명령어 뒤의 대화를 그대로 출력한다.';
     }
 
     onTrigger(msgInfo, args) {
