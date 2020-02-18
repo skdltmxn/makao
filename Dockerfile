@@ -2,7 +2,7 @@ FROM node:13
 
 WORKDIR /app
 
-COPY ./packages*.json ./
+COPY ./package*.json ./
 COPY ./start.js ./
 COPY ./app ./
 COPY ./config ./
