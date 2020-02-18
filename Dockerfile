@@ -1,15 +1,15 @@
 FROM node:12
 
-WORKDIR /app
+WORKDIR /makao
 
 COPY ./package.json ./
 COPY ./package-lock.json ./
-COPY ./start.js ./
-COPY ./app ./
-COPY ./config ./
-COPY ./kakao ./
-COPY ./server ./
-
 RUN npm ci
+
+COPY start.js .
+COPY app/ app/
+COPY config/ config/
+COPY kakao/ kakao/
+COPY server/ server/
 
 CMD [ "node", "start.js" ]
