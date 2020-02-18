@@ -13,7 +13,6 @@
   "author": "skdltmxn",
   "license": "MIT",
   "dependencies": {
-    "app-module-path": "^2.2.0",
     "axios": "^0.19.2",
     "bson": "^4.0.3",
     "dotenv": "^8.2.0",

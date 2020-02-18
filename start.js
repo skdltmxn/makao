@@ -2,7 +2,6 @@
 
 'use strict';
 
-require('app-module-path').addPath(__dirname);
 const MakaoServer = require('./server');
 
 (async () => {

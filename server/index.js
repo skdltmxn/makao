@@ -4,7 +4,7 @@
 
 const Config = require('../config');
 const express = require('express');
-const { KakaoClient } = require('kakao');
+const { KakaoClient } = require('../kakao');
 const { ServiceManager } = require('./service');
 
 class MakaoServer {
