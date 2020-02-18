@@ -10,6 +10,6 @@ COPY ./config ./
 COPY ./kakao ./
 COPY ./server ./
 
-RUN npm ci
+RUN npm install
 
 CMD [ "node", "start.js" ]
