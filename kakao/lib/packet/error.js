@@ -3,12 +3,12 @@
 'use strict';
 
 class LocoPacketDataTooShort extends Error {
-    constructor(message, chunk) {
-        super(message);
+    constructor(chunk) {
+        super('data too short');
         this.chunk = chunk;
     }
 
-    chunk() {
+    getChunk() {
         return this.chunk;
     }
 }

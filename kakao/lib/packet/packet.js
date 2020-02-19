@@ -6,10 +6,11 @@ const bson = require('bson');
 const { LocoPacketDataTooShort } = require('./error');
 
 class LocoPacket {
-    constructor(id, method, body) {
+    constructor(id, method, body, size) {
         this.id = id
         this.method = method
-        this.body = body;
+        this.body = body
+        this.size = size
     }
 
     static from(data) {
@@ -27,7 +28,7 @@ class LocoPacket {
         const method = data.slice(6, 17).toString().replace(/\0/g, '');
         const body = data.slice(22, 22 + bodyLength);
 
-        return new LocoPacket(id, method, bson.deserialize(body));
+        return new LocoPacket(id, method, bson.deserialize(body), 22 + bodyLength);
     }
 
     toBuffer() {

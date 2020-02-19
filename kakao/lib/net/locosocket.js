@@ -22,7 +22,8 @@ class LocoSocket extends EventEmitter2 {
 
     async connect() {
         this.conn = net.connect(this.port, this.host, async () => {
-            this.conn.on('data', async data => await this.tryParse(data));
+            this.on('block', this.processBlock);
+            this.conn.on('data', async chunk => await this.decryptChunk(chunk));
         });
 
         await this.handshake();
@@ -57,27 +58,35 @@ class LocoSocket extends EventEmitter2 {
         await this.write(packet);
     }
 
-    async tryParse(data) {
+    async decryptChunk(chunk) {
         try {
-            data = Buffer.concat([this.buffer, data]);
+            while (chunk.length > 0) {
+                const len = chunk.readUInt32LE(0);
+                if (chunk.length < len + 4)
+                    throw new Error('broken chunk');
 
-            while (true) {
-                const len = data.readUInt32LE(0);
-                if (data.length < len + 4)
-                    throw new LocoPacketDataTooShort(data);
-
-                const iv = data.slice(4, 20);
-                const payload = this.cryptor.aesDecrypt(data.slice(20, len + 4), iv);
-                const packet = LocoPacket.from(payload);
-                
-                await this.emitAsync('packet', packet);
-                data = data.slice(len + 4);
+                const iv = chunk.slice(4, 20);
+                const block = this.cryptor.aesDecrypt(chunk.slice(20, len + 4), iv);
+                this.buffer = Buffer.concat([this.buffer, block]);
+                chunk = chunk.slice(len + 4);
             }
+
+            await this.emitAsync('block');
         } catch (e) {
-            if (e instanceof LocoPacketDataTooShort) {
+            console.log(e);
+        }
+    }
+
+    async processBlock() {
+        if (this.buffer.length === 0) return;
+
+        try {
+            const packet = LocoPacket.from(this.buffer);
+            this.buffer = this.buffer.slice(packet.size);
+            await this.emitAsync('packet', packet);
+        } catch (e) {
+            if (!(e instanceof LocoPacketDataTooShort))
                 console.log(e);
-                this.buffer = Buffer.concat([this.buffer, e.chunk()]);
-            }
         }
     }
 }
