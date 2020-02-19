@@ -70,7 +70,7 @@ class CoinService extends CommandService {
 
         const coin = args[0].toUpperCase();
         const info = await this.getCoinInfo(`CRIX.UPBIT.KRW-${coin}`);
-        const time = moment(info.timestamp);
+        const time = moment(info.timestamp).utcOffset(9);
         const price = Intl.NumberFormat('en-US', { style: 'currency', currency: 'KRW' })
             .format(info.tradePrice);
 
