@@ -50,6 +50,14 @@ class CarriageClient extends LocoClient {
     async sendTextMsg(chatId, msg) {
         await this.sendMsg(chatId, msg, 1);
     }
+
+    startPingTimer() {
+        // every 1 min
+        setInterval(async () => {
+            const req = new LocoPacketBuilder('PING').final();
+            await this.write(req);
+        }, 60 * 1000);
+    }
 }
 
 module.exports = CarriageClient;

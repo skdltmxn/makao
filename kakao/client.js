@@ -35,6 +35,7 @@ class KakaoClient extends EventEmitter2 {
         });
         await carriageClient.connect();
         await carriageClient.loginList();
+        carriageClient.startPingTimer();
 
         this.carriageClient = carriageClient;
     }

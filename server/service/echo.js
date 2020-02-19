@@ -14,9 +14,8 @@ class EchoService extends CommandService {
         return '명령어 뒤의 대화를 그대로 출력한다.';
     }
 
-    onTrigger(msgInfo, args) {
-        console.log(args);
-        this.kakaoClient.sendMsg(
+    async onTrigger(msgInfo, args) {
+        await this.kakaoClient.sendMsg(
             msgInfo.chatId,
             `[${msgInfo.authorNickname}] ${args.join(' ')}`
         );

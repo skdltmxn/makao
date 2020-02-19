@@ -9,6 +9,7 @@ class CommandService extends BaseService {
         super(kakaoClient);
 
         this.trigger = trigger;
+
         this.on(`cmd.${trigger}`, async msgInfo => {
             const args = msgInfo.message.split(/\s+/).splice(1);
 
@@ -20,7 +21,17 @@ class CommandService extends BaseService {
                     e.message
                 );
             }
-        })
+        });
+
+        this.on('service.msg', msgInfo => {
+            // can be a command
+            if (msgInfo.message[0] === '/') {
+                const args = msgInfo.message.split(/\s+/);
+                const verb = args[0].substr(1);
+
+                this.emit(`cmd.${verb}`, msgInfo);
+            }
+        });
     }
 
     serviceTrigger() {

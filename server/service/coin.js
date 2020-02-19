@@ -71,14 +71,17 @@ class CoinService extends CommandService {
         const coin = args[0].toUpperCase();
         const info = await this.getCoinInfo(`CRIX.UPBIT.KRW-${coin}`);
         const time = moment(info.timestamp).utcOffset(9);
-        const price = Intl.NumberFormat('en-US', { style: 'currency', currency: 'KRW' })
-            .format(info.tradePrice);
+        const price = Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'KRW',
+            maximumSignificantDigits: 3,
+        }).format(info.tradePrice);
 
         const msg = `현재 시세 - ${coin}\n\n` +
             `조회 시간 - ${time.format('YYYY-MM-DD HH:mm:ss')}\n` +
             `현재 가격 - ${price}`;
 
-        this.kakaoClient.sendMsg(
+        await this.kakaoClient.sendMsg(
             msgInfo.chatId,
             msg
         );

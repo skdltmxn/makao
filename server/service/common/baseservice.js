@@ -10,14 +10,7 @@ class BaseService extends EventEmitter2 {
 
         kakaoClient.on('makao.MSG', msgInfo => {
             if (!msgInfo.message) return;
-
-            // can be a command
-            if (msgInfo.message[0] === '/') {
-                const args = msgInfo.message.split(/\s+/);
-                const verb = args[0].substr(1);
-
-                this.emit(`cmd.${verb}`, msgInfo);
-            }
+            this.emit('service.msg', msgInfo);
         });
 
         this.kakaoClient = kakaoClient;

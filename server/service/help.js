@@ -15,10 +15,10 @@ class HelpService extends CommandService {
         return '현재 지원되는 모든 명령어를 출력한다.';
     }
 
-    onTrigger(msgInfo, _) {
+    async onTrigger(msgInfo, _) {
         const output = [];
         this.services.forEach(svc => output.push(`/${svc.serviceTrigger()}: ${svc.description()}`));
-        this.kakaoClient.sendMsg(
+        await this.kakaoClient.sendMsg(
             msgInfo.chatId,
             output.join('\n')
         );
