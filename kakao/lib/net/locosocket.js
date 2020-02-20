@@ -81,9 +81,11 @@ class LocoSocket extends EventEmitter2 {
         if (this.buffer.length === 0) return;
 
         try {
-            const packet = LocoPacket.from(this.buffer);
-            this.buffer = this.buffer.slice(packet.size);
-            await this.emitAsync('packet', packet);
+            while (this.buffer.length > 0) {
+                const packet = LocoPacket.from(this.buffer);
+                this.buffer = this.buffer.slice(packet.size);
+                await this.emitAsync('packet', packet);
+            }
         } catch (e) {
             if (!(e instanceof LocoPacketDataTooShort))
                 console.log(e);
