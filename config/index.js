@@ -16,4 +16,8 @@ config.DEVICE_NAME = process.env.DEVICE_NAME || 'makao';
 config.USER_ID = process.env.USER_ID || '';
 config.PASSWORD = process.env.PASSWORD || '';
 
+config.DB_HOST = process.env.DB_HOST || 'localhost';
+config.DB_PORT = process.env.DB_PORT || 27017;
+config.DB_NAME = process.env.DB_NAME || 'makao';
+
 config.MAKAO_API_SERVER_PORT = 4000;

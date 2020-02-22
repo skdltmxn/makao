@@ -36,7 +36,7 @@ class LocoPacket {
         const buffer = Buffer.allocUnsafe(22 + bsonBody.length);
         buffer.fill(0, 0, 22);
         buffer.writeUInt32LE(0, 0); // packet ID
-        buffer.writeUInt16LE(0, 4);
+        buffer.writeUInt16LE(0, 4); // status
         buffer.write(this.method, 6, 'utf-8');
         buffer.writeUInt8(0, 17);
         buffer.writeUInt32LE(bsonBody.length, 18);

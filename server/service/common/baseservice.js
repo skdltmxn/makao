@@ -5,7 +5,7 @@
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
 
 class BaseService extends EventEmitter2 {
-    constructor(kakaoClient) {
+    constructor(kakaoClient, type) {
         super({ wildcard: true });
 
         kakaoClient.on('makao.MSG', msgInfo => {
@@ -14,6 +14,7 @@ class BaseService extends EventEmitter2 {
         });
 
         this.kakaoClient = kakaoClient;
+        this.type = type;
     }
 }
 

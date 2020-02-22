@@ -7,7 +7,7 @@ const Config = require('../config');
 const AccountManager = require('./lib/account');
 const Cryptor = require('./lib/cryptor');
 const errCodeString = require('./lib/error');
-const { UserInfo, MsgInfo } = require('./model');
+const { UserInfo, MsgInfo, ChatInfo } = require('./model');
 const BookingClient = require('./booking');
 const TicketClient = require('./ticket');
 const CarriageClient = require('./carriage');
@@ -89,6 +89,33 @@ class KakaoClient extends EventEmitter2 {
         const res = await this.accountMgr.registerDevice(passcode);
         console.log(errCodeString(res.status));
         return res;
+    }
+
+    async sendMchatLogs(chatIds, sinces) {
+        if (!this.carriageClient.isConnected())
+            throw new Error('not connected to server');
+
+        try {
+            await this.carriageClient.requestMchatLogs(chatIds, sinces);
+        } catch (e) {
+            console.log(e.message);
+        }
+    }
+
+    async getChatList(callback = null) {
+        if (!this.carriageClient.isConnected())
+            throw new Error('not connected to server');
+
+        try {
+            await this.carriageClient.requestLChatList(res => {
+                const chat = [];
+                res.chatDatas.forEach(c => chat.push(new ChatInfo(c)));
+                if (callback)
+                    callback(chat);
+            });
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     async sendMsg(chatId, msg) {

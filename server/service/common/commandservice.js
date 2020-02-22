@@ -6,7 +6,7 @@ const BaseService = require('./baseservice');
 
 class CommandService extends BaseService {
     constructor(kakaoClient, trigger) {
-        super(kakaoClient);
+        super(kakaoClient, 'command');
 
         this.trigger = trigger;
 

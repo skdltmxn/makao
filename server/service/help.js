@@ -17,7 +17,10 @@ class HelpService extends CommandService {
 
     async onTrigger(msgInfo, _) {
         const output = [];
-        this.services.forEach(svc => output.push(`/${svc.serviceTrigger()}: ${svc.description()}`));
+        this.services
+            .filter(svc => svc.type === 'command')
+            .forEach(svc => output.push(`/${svc.serviceTrigger()}: ${svc.description()}`));
+
         await this.kakaoClient.sendMsg(
             msgInfo.chatId,
             output.join('\n')
