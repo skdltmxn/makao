@@ -11,5 +11,6 @@ process.on('unhandledRejection', (err) => {
 
 (async () => {
     const server = new MakaoServer();
+    await server.init();
     server.start();
 })();

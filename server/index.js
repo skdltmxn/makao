@@ -11,13 +11,27 @@ const { DbClient } = require('../lib/db');
 class MakaoServer {
     constructor() {
         this.app = express();
-        this.app.use(express.json());
         this.kakaoClient = new KakaoClient();
-
         this.dbClient = new DbClient(Config.DB_NAME);
-        this.dbClient.connect();
-
         this.serviceManager = new ServiceManager();
+        // this.app.get('/', (_, res) => {
+        //     res.send('Hello World');
+        // });
+
+        // this.app.get('/login', async (_, res) => {
+        //     const loginRes = await this.kakaoClient.login();
+        //     res.send(loginRes);
+        // });
+
+        // this.app.post('/test', (req, res) => {
+        //     console.log(req.body);
+        //     res.json({ success: true });
+        // });
+    }
+
+    async init() {
+        this.app.use(express.json());
+        await this.dbClient.connect();
         this.serviceManager.initService(this.kakaoClient, this.dbClient);
 
         this.app.post('/api/v1/db/insertOne', async (req, res) => {
@@ -40,20 +54,6 @@ class MakaoServer {
                 res.json({ success: false, error: e.toString() });
             }
         });
-
-        // this.app.get('/', (_, res) => {
-        //     res.send('Hello World');
-        // });
-
-        // this.app.get('/login', async (_, res) => {
-        //     const loginRes = await this.kakaoClient.login();
-        //     res.send(loginRes);
-        // });
-
-        // this.app.post('/test', (req, res) => {
-        //     console.log(req.body);
-        //     res.json({ success: true });
-        // });
     }
 
     start() {
