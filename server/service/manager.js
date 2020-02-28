@@ -2,9 +2,8 @@
 
 'use strict';
 
-//const EchoService = require('./echo');
 const CoinService = require('./coin');
-//const SummaryService = require('./summary');
+const SummaryService = require('./summary');
 const RelayService = require('./relay');
 const { KeywordService, KeywordDeleteService, KeywordStorage } = require('./keyword');
 const CovidService = require('./covid');
@@ -16,9 +15,8 @@ class ServiceManager {
     }
 
     initService(kakaoClient, dbClient) {
-        //this.services.push(new EchoService(kakaoClient));
         this.services.push(new CoinService(kakaoClient));
-        //this.services.push(new SummaryService(kakaoClient));
+        this.services.push(new SummaryService(kakaoClient));
         this.services.push(new RelayService(kakaoClient, dbClient));
         const keywordStorge = new KeywordStorage(dbClient);
         this.services.push(new KeywordService(kakaoClient, keywordStorge));
