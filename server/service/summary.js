@@ -27,30 +27,34 @@ class SummaryService extends CommandService {
     }
 
     async onTrigger(msgInfo, _) {
-        const since = bson.Long.fromNumber(msgInfo.logId - (DELTA * 60 * 60 * 3));
-        await this.kakaoClient.getChatLog([msgInfo.chatId], [since], async chatLogs => {
-            const rank = {};
+        let since = bson.Long.fromNumber(msgInfo.logId - (DELTA * 60 * 60 * 3));
+        const rank = {};
+
+        while (true) {
+            const [chatLogs, eof] = await this.kakaoClient.getChatLog([msgInfo.chatId], [since]);
+
             chatLogs.filter(log => log.type == 'normal' && log.authorId !== this.kakaoClient.userInfo.userId)
                 .forEach(log => {
-                    log.message.split(/\s+/)
-                        .forEach(token => {
-                            if (this.isUsable(token)) {
-                                if (token in rank) rank[token]++;
-                                else rank[token] = 1;
-                            }
-                        });
+                    log.message.split(/\s+/).forEach(token => {
+                        if (this.isUsable(token)) {
+                            if (token in rank) rank[token]++;
+                            else rank[token] = 1;
+                        }
+                    });
                 });
 
-            console.log(rank);
-            const summary = Object.keys(rank).sort((a, b) => rank[b] - rank[a]).slice(0, 3);
-            const msg = summary.map((s, i) => `${i + 1}. ${s}`).join('\n');
+            if (eof) break;
 
-            await this.kakaoClient.sendMsg(
-                msgInfo.chatId,
-                `세줄요약\n\n${msg}`
-            );
-        })
+            since = chatLogs.pop().logId;
+        }
 
+        const summary = Object.keys(rank).sort((a, b) => rank[b] - rank[a]).slice(0, 3);
+        const msg = summary.map((s, i) => `${i + 1}. ${s}`).join('\n');
+
+        await this.kakaoClient.sendMsg(
+            msgInfo.chatId,
+            `세줄요약\n\n${msg}`
+        );
     }
 }
 

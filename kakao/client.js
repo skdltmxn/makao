@@ -91,19 +91,20 @@ class KakaoClient extends EventEmitter2 {
         return res;
     }
 
-    async getChatLog(chatIds, sinces, callback=null) {
-        if (!this.carriageClient.isConnected())
-            throw new Error('not connected to server');
+    async getChatLog(chatIds, sinces) {
+        return new Promise(async (resolve, reject) => {
+            if (!this.carriageClient.isConnected())
+                return reject('not connected to server');
 
-        try {
-            await this.carriageClient.requestMchatLogs(chatIds, sinces, res => {
-                const chatLogs = res.chatLogs.map(log => new ChatLog(log))
-                if (callback)
-                    callback(chatLogs);
-            });
-        } catch (e) {
-            console.log(e);
-        }
+            try {
+                await this.carriageClient.requestMchatLogs(chatIds, sinces, res => {
+                    const chatLogs = res.chatLogs.map(log => new ChatLog(log))
+                    resolve([chatLogs, res.eof]);
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        }).catch(err => console.log(`[getChatLog] ${err}`));
     }
 
     async getChatList(callback = null) {
