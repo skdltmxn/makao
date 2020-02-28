@@ -12,7 +12,7 @@ class MsgInfo {
         this.message = info.chatLog.message;
         this.msgId = info.chatLog.msgId;
         this.logId = info.chatLog.logId;
-        this.msgType = msgType[info.chatLog.type] || 'unknown',
+        this.msgType = msgType[info.chatLog.type] || 'unknown';
         this.attachment = info.chatLog.attachment || null;
     }
 }

@@ -7,6 +7,7 @@ const CoinService = require('./coin');
 //const SummaryService = require('./summary');
 const RelayService = require('./relay');
 const { KeywordService, KeywordDeleteService, KeywordStorage } = require('./keyword');
+const CovidService = require('./covid');
 const HelpService = require('./help');
 
 class ServiceManager {
@@ -22,6 +23,7 @@ class ServiceManager {
         const keywordStorge = new KeywordStorage(dbClient);
         this.services.push(new KeywordService(kakaoClient, keywordStorge));
         this.services.push(new KeywordDeleteService(kakaoClient, keywordStorge));
+        this.services.push(new CovidService(kakaoClient));
         this.services.push(new HelpService(kakaoClient, this.services));
     }
 }
