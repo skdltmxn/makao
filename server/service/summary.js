@@ -17,7 +17,7 @@ class SummaryService extends CommandService {
         return '지정한 시간 동안의 대화의 내용을 요약한다.';
     }
 
-    filter(token) {
+    isUsable(token) {
         if (token.length < 2) return false;
         if (token[0] === '/') return false;
         if (token in this.blacklist) return false;
@@ -32,13 +32,16 @@ class SummaryService extends CommandService {
             const rank = {};
             chatLogs.filter(log => log.type == 'normal' && log.authorId !== this.kakaoClient.userInfo.userId)
                 .forEach(log => {
-                    log.message.split(/\s+/).filter(token => this.filter(token))
+                    log.message.split(/\s+/)
                         .forEach(token => {
-                            if (token in rank) rank[token]++;
-                            else rank[token] = 1;
+                            if (this.isUsable(token)) {
+                                if (token in rank) rank[token]++;
+                                else rank[token] = 1;
+                            }
                         });
                 });
 
+            console.log(rank);
             const summary = Object.keys(rank).sort((a, b) => rank[b] - rank[a]).slice(0, 3);
             const msg = summary.map((s, i) => `${i + 1}. ${s}`).join('\n');
 
