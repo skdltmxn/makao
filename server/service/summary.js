@@ -30,7 +30,7 @@ class SummaryService extends CommandService {
         const since = bson.Long.fromNumber(msgInfo.logId - (DELTA * 60 * 60 * 3));
         await this.kakaoClient.getChatLog([msgInfo.chatId], [since], async chatLogs => {
             const rank = {};
-            chatLogs.filter(log => log.authorId !== this.kakaoClient.userInfo.userId)
+            chatLogs.filter(log => log.type == 'normal' && log.authorId !== this.kakaoClient.userInfo.userId)
                 .forEach(log => {
                     log.message.split(/\s+/).filter(token => this.filter(token))
                         .forEach(token => {
