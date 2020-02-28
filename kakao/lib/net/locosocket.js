@@ -14,6 +14,7 @@ class LocoSocket extends EventEmitter2 {
         this.cryptor = cryptor;
         this.conn = null;
         this.buffer = Buffer.allocUnsafe(0);
+        this.chunk = Buffer.allocUnsafe(0);
     }
 
     isConnected() {
@@ -23,7 +24,7 @@ class LocoSocket extends EventEmitter2 {
     async connect() {
         this.conn = net.connect(this.port, this.host, async () => {
             this.on('block', this.processBlock);
-            this.conn.on('data', async chunk => await this.decryptChunk(chunk));
+            this.conn.on('data', chunk => this.decryptChunk(chunk));
         });
 
         await this.handshake();
@@ -58,33 +59,34 @@ class LocoSocket extends EventEmitter2 {
         await this.write(packet);
     }
 
-    async decryptChunk(chunk) {
+    decryptChunk(chunk) {
+        this.chunk = Buffer.concat([this.chunk, chunk]);
         try {
-            while (chunk.length > 0) {
-                const len = chunk.readUInt32LE(0);
-                if (chunk.length < len + 4)
-                    throw new Error('broken chunk');
+            while (this.chunk.length > 0) {
+                const len = this.chunk.readUInt32LE(0);
+                if (this.chunk.length < len + 4)
+                    break;
 
-                const iv = chunk.slice(4, 20);
-                const block = this.cryptor.aesDecrypt(chunk.slice(20, len + 4), iv);
+                const iv = this.chunk.slice(4, 20);
+                const block = this.cryptor.aesDecrypt(this.chunk.slice(20, len + 4), iv);
                 this.buffer = Buffer.concat([this.buffer, block]);
-                chunk = chunk.slice(len + 4);
+                this.chunk = this.chunk.slice(len + 4);
             }
 
-            await this.emitAsync('block');
+            this.emit('block');
         } catch (e) {
             console.log(e);
         }
     }
 
-    async processBlock() {
+    processBlock() {
         if (this.buffer.length === 0) return;
 
         try {
             while (this.buffer.length > 0) {
                 const packet = LocoPacket.from(this.buffer);
                 this.buffer = this.buffer.slice(packet.size);
-                await this.emitAsync('packet', packet);
+                this.emit('packet', packet);
             }
         } catch (e) {
             if (!(e instanceof LocoPacketDataTooShort))
