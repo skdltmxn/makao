@@ -20,6 +20,7 @@ class SummaryService extends CommandService {
             '그리고',
             '그런데',
             '그렇지만',
+            '그냥',
         ];
     }
 
@@ -30,7 +31,7 @@ class SummaryService extends CommandService {
     isUsable(token) {
         if (token.length < 2) return false;
         if (token[0] === '/') return false;
-        if (token in this.blacklist) return false;
+        if (this.blacklist.includes(token)) return false;
         if (token.match(/^[\u3131-\u314e?\.,!]+$/u)) return false;
 
         return true;
