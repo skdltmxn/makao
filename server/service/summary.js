@@ -10,7 +10,17 @@ class SummaryService extends CommandService {
     constructor(kakaoClient) {
         super(kakaoClient, '세줄요약');
         this.kakaoClient = kakaoClient;
-        this.blacklist = [];
+        this.blacklist = [
+            '근데',
+            '그래서',
+            '그러나',
+            '하지만',
+            '그래도',
+            '그치만',
+            '그리고',
+            '그런데',
+            '그렇지만',
+        ];
     }
 
     description() {
@@ -49,7 +59,9 @@ class SummaryService extends CommandService {
         }
 
         const summary = Object.keys(rank).sort((a, b) => rank[b] - rank[a]).slice(0, 3);
-        const msg = summary.map((s, i) => `${i + 1}. ${s}`).join('\n');
+        const msg = summary.length >= 3 
+            ? summary.map((s, i) => `${i + 1}. ${s}`).join('\n')
+            : '요약할 내용이 없습니다';
 
         await this.kakaoClient.sendMsg(
             msgInfo.chatId,
