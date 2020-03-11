@@ -4,6 +4,7 @@
 
 const CommandService = require('./common/commandservice');
 const axios = require('axios');
+const html = require('node-html-parser');
 
 class CovidService extends CommandService {
     constructor(kakaoClient) {
@@ -26,20 +27,31 @@ class CovidService extends CommandService {
         return str.substr(start, end - start);
     }
 
-    parseData(data) {
-        const date = this.mid(data, '발생 현황(', ')').replace('&nbsp;', ' ');
-        const infected = this.mid(data, '<td class="w_bold">', '</td>', data.indexOf('>확진환자<')).replace('&nbsp;', ' ');
-        const released = this.mid(data, '<td class="w_bold">', '</td>', data.indexOf('>확진환자 격리해제<')).replace('&nbsp;', ' ');
-        const dead = this.mid(data, '<td class="w_bold">', '</td>', data.indexOf('>사망자<')).replace('&nbsp;', ' ');
-        const processing = this.mid(data, '<td class="w_bold">', '</td>', data.indexOf('>검사진행<')).replace('&nbsp;', ' ');
+    extractPureText(node) {
+        return node.childNodes.filter(n => n.nodeType == html.NodeType.TEXT_NODE)[0].text
+    }
 
-        return [date, infected, released, dead, processing];
+    parseData(data) {
+        const root = html.parse(data).querySelector('.liveboard_layout');
+        const liveNodeRoot = root.querySelector('.liveNum');
+
+        const date = this.mid(root.querySelector('.livedate').text, '(', ',').replace('&nbsp;', ' ');
+
+        let msg = `코로나 현황 (${date})\n\n`;
+
+        for (const liveNode of liveNodeRoot.querySelectorAll('li')) {
+            const title = this.extractPureText(liveNode.querySelector('.tit'));
+            const number = this.extractPureText(liveNode.querySelector('.num'));
+            const before = this.mid(liveNode.querySelector('.before').text, '(', ')').replace(' ', '');
+            msg += `${title}: ${number}명 (${before})\n`;
+        }
+
+        return msg.trim();
     }
 
     async onTrigger(msgInfo, _) {
-        const res = await axios.get('http://ncov.mohw.go.kr/bdBoardList_Real.do');
-        const status = this.parseData(res.data);
-        const msg = `코로나 현황 (${status[0]})\n\n확진자: ${status[1]}\n격리해제: ${status[2]}\n사망자: ${status[3]}\n검사중: ${status[4]}`;
+        const res = await axios.get('http://ncov.mohw.go.kr');
+        const msg = this.parseData(res.data);
         await this.kakaoClient.sendMsg(
             msgInfo.chatId,
             msg
