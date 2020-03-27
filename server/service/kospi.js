@@ -38,7 +38,7 @@ class KospiService extends CommandService {
     async onTrigger(msgInfo, _) {
         const kospi = await this.poll();
         const num = n => Intl.NumberFormat('ko-KR').format(n);
-        const signed = n => n >= 0 ? `+${n}` : `-${n}`;
+        const signed = n => n >= 0 ? `+${Math.abs(n)}` : `-${Math.abs(n)}`;
 
         const msg = `KOSPI (${kospi.time.format('YYYY-MM-DD HH:mm:ss')}) ${kospi.market}\n\n` + 
             `지수: ${num(kospi.current)} ${signed(kospi.delta)} (${signed(kospi.deltaPercent)}%)\n` +
