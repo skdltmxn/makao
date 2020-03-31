@@ -44,6 +44,15 @@ class CarriageClient extends LocoClient {
         await this.write(req, callback);
     }
 
+    async requestMember(chatId, memberIds, callback = null) {
+        const req = new LocoPacketBuilder('MEMBER')
+            .add('chatId', chatId)
+            .add('memberIds', memberIds)
+            .final();
+
+        await this.write(req, callback);
+    }
+
     async requestMchatLogs(chatIds, sinces, callback = null) {
         const req = new LocoPacketBuilder('MCHATLOGS')
             .add('chatIds', chatIds)

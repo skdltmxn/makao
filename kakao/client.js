@@ -11,6 +11,7 @@ const { UserInfo, MsgInfo, ChatInfo, ChatLog } = require('./model');
 const BookingClient = require('./booking');
 const TicketClient = require('./ticket');
 const CarriageClient = require('./carriage');
+const bson = require('bson');
 
 class KakaoClient extends EventEmitter2 {
     constructor() {
@@ -82,7 +83,27 @@ class KakaoClient extends EventEmitter2 {
         return res;
     }
 
-    getChatMembers(chatId) {
+    async getChatMember(chatId, userId) {
+        if (!(chatId in this.chatMembers))
+            this.chatMembers[chatId] = await this.getMembers(bson.Long.fromNumber(chatId));
+
+        const missed = [];
+
+        userId.forEach(user => {
+            if (!(user in this.chatMembers[chatId]))
+                missed.push(user);
+        });
+
+        // fetch from server
+        if (missed.length > 0) {
+            const newMembers = await this.getUserInfoFromChat(
+                bson.Long.fromNumber(chatId),
+                missed.map(bson.Long.fromNumber),
+            );
+
+            Object.assign(this.chatMembers[chatId], newMembers);
+        }
+
         return this.chatMembers[chatId];
     }
 
@@ -96,6 +117,23 @@ class KakaoClient extends EventEmitter2 {
         const res = await this.accountMgr.registerDevice(passcode);
         console.log(errCodeString(res.status));
         return res;
+    }
+
+    async getUserInfoFromChat(chatId, memberIds) {
+        return new Promise(async (resolve, reject) => {
+            if (!this.carriageClient.isConnected())
+                return reject('not connected to server');
+
+            try {
+                await this.carriageClient.requestMember(chatId, memberIds, res => {
+                    const members = {};
+                    res.members.forEach(member => members[member.userId] = member.nickName);
+                    resolve(members);
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        }).catch(err => console.log(`[getMembers] ${err}`));
     }
 
     async getMembers(chatId) {

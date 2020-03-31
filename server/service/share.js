@@ -68,7 +68,7 @@ class ShareService extends CommandService {
 
             const share = await this.getShare(msgInfo, since);
             const rank = Object.keys(share).sort((a, b) => share[b] - share[a]);
-            const members = this.kakaoClient.getChatMembers(msgInfo.chatId);
+            const members = await this.kakaoClient.getChatMember(msgInfo.chatId, rank);
 
             let msg = `대화 지분 (${since}시간)\n\n`;
             rank.forEach((user, i) => {
