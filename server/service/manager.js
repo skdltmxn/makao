@@ -10,6 +10,7 @@ const CovidService = require('./covid');
 const { DdayStorage, DdayDeleteService, DdayService} = require('./dday');
 const FinanceService = require('./finance');
 const KospiService = require('./kospi');
+const ShareService = require('./share');
 const HelpService = require('./help');
 
 class ServiceManager {
@@ -30,6 +31,7 @@ class ServiceManager {
         this.services.push(new DdayService(kakaoClient, ddayStorage));
         this.services.push(new FinanceService(kakaoClient));
         this.services.push(new KospiService(kakaoClient));
+        this.services.push(new ShareService(kakaoClient));
         this.services.push(new HelpService(kakaoClient, this.services));
     }
 }

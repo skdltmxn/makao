@@ -7,7 +7,7 @@ class ChatInfo {
         this.chatId = info.c;
         this.type = info.t;
         this.total = info.a;
-        this.members = info.i.map((userId, i) => [userId, info.k[i]]);
+        this.members = Object.assign({}, ...info.i.map((userId, i) => ({[userId]: info.k[i]}))),
         this.p = info.p;
     }
 }

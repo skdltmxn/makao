@@ -20,6 +20,7 @@ class KakaoClient extends EventEmitter2 {
         this.cryptor = new Cryptor();
         this.userInfo = null;
         this.carriageClient = null;
+        this.chatDatas = {};
     }
 
     async loginCarriage(host, port) {
@@ -28,7 +29,9 @@ class KakaoClient extends EventEmitter2 {
             value.method = event;
             //console.log(value);
         });
-        //carriageClient.on('LOGINLIST', body => console.log(body));
+        carriageClient.on('LOGINLIST', body => {
+            body.chatDatas.forEach(chat => this.chatDatas[chat.c] = new ChatInfo(chat));
+        });
         carriageClient.on('MSG', async body => {
             const msgInfo = new MsgInfo(body);
             await this.emitAsync('makao.MSG', msgInfo);
@@ -79,6 +82,10 @@ class KakaoClient extends EventEmitter2 {
         return res;
     }
 
+    getChatData(chatId) {
+        return this.chatDatas[chatId];
+    }
+
     async requestPasscode() {
         const res = await this.accountMgr.requestPasscode();
         console.log(errCodeString(res.status));
@@ -89,6 +96,21 @@ class KakaoClient extends EventEmitter2 {
         const res = await this.accountMgr.registerDevice(passcode);
         console.log(errCodeString(res.status));
         return res;
+    }
+
+    async getMembers(chatId) {
+        return new Promise(async (resolve, reject) => {
+            if (!this.carriageClient.isConnected())
+                return reject('not connected to server');
+
+            try {
+                await this.carriageClient.requestGetMem(chatId, res => {
+                    console.log(req);
+                });
+            } catch (E) {
+                console.log(e);
+            }
+        }).catch(err => console.log(`[getMembers] ${err}`));
     }
 
     async getChatLog(chatIds, sinces) {
@@ -107,20 +129,22 @@ class KakaoClient extends EventEmitter2 {
         }).catch(err => console.log(`[getChatLog] ${err}`));
     }
 
-    async getChatList(callback = null) {
-        if (!this.carriageClient.isConnected())
-            throw new Error('not connected to server');
+    async getChatList() {
+        return new Promise(async (resolve, reject) => {
+            if (!this.carriageClient.isConnected())
+                throw new Error('not connected to server');
 
-        try {
-            await this.carriageClient.requestLChatList(res => {
-                const chat = [];
-                res.chatDatas.forEach(c => chat.push(new ChatInfo(c)));
-                if (callback)
-                    callback(chat);
-            });
-        } catch (e) {
-            console.log(e);
-        }
+            try {
+                await this.carriageClient.requestLChatList(res => {
+                    const chat = [];
+                    res.chatDatas.forEach(c => chat.push(new ChatInfo(c)));
+                    resolve(chat);
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        }).catch(err => console.log(`[getChatList] ${err}`));
+
     }
 
     async sendMsg(chatId, msg) {

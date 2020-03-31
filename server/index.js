@@ -47,9 +47,8 @@ class MakaoServer {
 
         this.app.get('/api/v1/kakao/chatlist', async (_, res) => {
             try {
-                await this.kakaoClient.getChatList(list => {
-                    res.json({ success: true, chat: list });
-                });
+                const list = await this.kakaoClient.getChatList();
+                res.json({ success: true, chat: list });
             } catch (e) {
                 res.json({ success: false, error: e.toString() });
             }
