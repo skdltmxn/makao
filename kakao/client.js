@@ -20,7 +20,7 @@ class KakaoClient extends EventEmitter2 {
         this.cryptor = new Cryptor();
         this.userInfo = null;
         this.carriageClient = null;
-        this.chatDatas = {};
+        this.chatMembers = {};
     }
 
     async loginCarriage(host, port) {
@@ -30,7 +30,7 @@ class KakaoClient extends EventEmitter2 {
             //console.log(value);
         });
         carriageClient.on('LOGINLIST', body => {
-            body.chatDatas.forEach(chat => this.chatDatas[chat.c] = new ChatInfo(chat));
+            body.chatDatas.forEach(async chat => this.chatMembers[chat.c] = await this.getMembers(chat.c));
         });
         carriageClient.on('MSG', async body => {
             const msgInfo = new MsgInfo(body);
@@ -82,8 +82,8 @@ class KakaoClient extends EventEmitter2 {
         return res;
     }
 
-    getChatData(chatId) {
-        return this.chatDatas[chatId];
+    getChatMembers(chatId) {
+        return this.chatMembers[chatId];
     }
 
     async requestPasscode() {
@@ -105,9 +105,11 @@ class KakaoClient extends EventEmitter2 {
 
             try {
                 await this.carriageClient.requestGetMem(chatId, res => {
-                    console.log(req);
+                    const members = {};
+                    res.members.forEach(member => members[member.userId] = member.nickName);
+                    resolve(members);
                 });
-            } catch (E) {
+            } catch (e) {
                 console.log(e);
             }
         }).catch(err => console.log(`[getMembers] ${err}`));
