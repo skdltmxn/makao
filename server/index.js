@@ -4,6 +4,7 @@
 
 const Config = require('../config');
 const express = require('express');
+const bson = require('bson');
 const { KakaoClient } = require('../kakao');
 const { ServiceManager } = require('./service');
 const { DbClient } = require('../lib/db');
@@ -49,6 +50,15 @@ class MakaoServer {
             try {
                 const list = await this.kakaoClient.getChatList();
                 res.json({ success: true, chat: list });
+            } catch (e) {
+                res.json({ success: false, error: e.toString() });
+            }
+        });
+
+        this.app.post('/api/v1/kakao/member', async (req, res) => {
+            try {
+                const members = await this.kakaoClient.getMembers(bson.Long.fromString(req.body.chatId));
+                res.json({ success: true, members: members });
             } catch (e) {
                 res.json({ success: false, error: e.toString() });
             }
