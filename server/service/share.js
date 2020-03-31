@@ -26,8 +26,8 @@ class ShareService extends CommandService {
 
             chatLogs.filter(log => log.type == 'normal' && log.authorId !== this.kakaoClient.userInfo.userId)
                 .forEach(log => {
-                    if (log.authorId in freqMap) freqMap[log.authorId] += log.message.length;
-                    else freqMap[log.authorId] = log.message.length;
+                    if (log.authorId in freqMap) freqMap[log.authorId] += log.message !== null ? log.message.length : 0;
+                    else freqMap[log.authorId] = log.message !== null ? log.message.length : 0;
                 });
 
             if (eof) break;
