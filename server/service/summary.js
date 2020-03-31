@@ -60,7 +60,7 @@ class SummaryService extends CommandService {
         while (true) {
             const [chatLogs, eof] = await this.kakaoClient.getChatLog([msgInfo.chatId], [since]);
 
-            chatLogs.filter(log => log.type == 'normal' && log.authorId !== this.kakaoClient.userInfo.userId)
+            chatLogs.filter(log => log.type == 'normal' && log.authorId !== this.kakaoClient.userInfo.userId && !log.message.startsWith('/'))
                 .forEach(log => {
                     log.message.split(/\s+/).forEach(token => {
                         if (this.isUsable(token)) {
