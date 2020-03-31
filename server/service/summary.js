@@ -3,7 +3,6 @@
 'use strict';
 
 const CommandService = require('./common/commandservice');
-const DELTA = 8388899092;
 const bson = require('bson');
 
 class SummaryService extends CommandService {
@@ -41,7 +40,7 @@ class SummaryService extends CommandService {
     }
 
     description() {
-        return '지정한 시간 동안의 대화의 내용을 요약한다.';
+        return '지정한 시간 동안의 대화의 내용을 요약한다. (기본 3시간)';
     }
 
     isUsable(token) {
@@ -53,8 +52,9 @@ class SummaryService extends CommandService {
         return true;
     }
 
-    async onTrigger(msgInfo, _) {
-        let since = bson.Long.fromNumber(msgInfo.logId - (DELTA * 60 * 60 * 3));
+    async getSummary(msgInfo, since) {
+        const DELTA = 8388899092;
+        since = bson.Long.fromNumber(msgInfo.logId - (DELTA * 60 * 60 * since));
         const rank = {};
 
         while (true) {
@@ -75,16 +75,42 @@ class SummaryService extends CommandService {
             since = chatLogs.pop().logId;
         }
 
+        return rank;
+    }
+
+    async onTrigger(msgInfo, args) {
+        let since = 3;
+
+        if (args.length > 0) {
+            const sinceString = args[0];
+            if (!isNaN(sinceString) && Number.isInteger(+sinceString)) {
+                since = +sinceString;
+                if (since < 1 || since > 12) {
+                    return await this.kakaoClient.sendMsg(
+                        msgInfo.chatId,
+                        '시간은 1 ~ 12시간까지만 가능합니다.'
+                    );
+                }
+            } else {
+                return await this.kakaoClient.sendMsg(
+                    msgInfo.chatId,
+                    '시간은 정수로 입력하세요.'
+                );
+            }
+        }
+
+        const rank = await this.getSummary(msgInfo, since);
         const summary = Object.keys(rank).sort((a, b) => rank[b] - rank[a]).slice(0, 3);
-        const msg = summary.length >= 3 
+        const msg = summary.length >= 3
             ? summary.map((s, i) => `${i + 1}. ${s}`).join('\n')
             : '요약할 내용이 없습니다';
 
         await this.kakaoClient.sendMsg(
             msgInfo.chatId,
-            `세줄요약\n\n${msg}`
+            `세줄요약 (${since}시간)\n\n${msg}`
         );
     }
 }
 
 module.exports = SummaryService;
+
