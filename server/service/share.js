@@ -45,40 +45,44 @@ class ShareService extends CommandService {
     }
 
     async onTrigger(msgInfo, args) {
-        let since = 3;
+        try {
+            let since = 3;
 
-        if (args.length > 0) {
-            const sinceString = args[0];
-            if (!isNaN(sinceString) && Number.isInteger(+sinceString)) {
-                since = +sinceString;
-                if (since < 1 || since > 12) {
+            if (args.length > 0) {
+                const sinceString = args[0];
+                if (!isNaN(sinceString) && Number.isInteger(+sinceString)) {
+                    since = +sinceString;
+                    if (since < 1 || since > 12) {
+                        return await this.kakaoClient.sendMsg(
+                            msgInfo.chatId,
+                            '시간은 1 ~ 12시간까지만 가능합니다.'
+                        );
+                    }
+                } else {
                     return await this.kakaoClient.sendMsg(
                         msgInfo.chatId,
-                        '시간은 1 ~ 12시간까지만 가능합니다.'
+                        '시간은 정수로 입력하세요.'
                     );
                 }
-            } else {
-                return await this.kakaoClient.sendMsg(
-                    msgInfo.chatId,
-                    '시간은 정수로 입력하세요.'
-                );
             }
+
+            const share = await this.getShare(msgInfo, since);
+            const rank = Object.keys(share).sort((a, b) => share[b] - share[a]);
+            const chatData = this.kakaoClient.getChatData(msgInfo.chatId);
+
+            let msg = `대화 지분 (${since}시간)\n\n`;
+            rank.forEach((user, i) => {
+                const rate = share[user] * 100;
+                msg += `${i + 1}. ${anonymize(chatData.members[user])} - ${rate.toFixed(2)}%\n`;
+            });
+
+            await this.kakaoClient.sendMsg(
+                msgInfo.chatId,
+                msg.trim(),
+            );
+        } catch (err) {
+            console.error(err);
         }
-
-        const share = await this.getShare(msgInfo, since);
-        const rank = Object.keys(share).sort((a, b) => share[b] - share[a]);
-        const chatData = this.kakaoClient.getChatData(msgInfo.chatId);
-
-        let msg = `대화 지분 (${since}시간)\n\n`;
-        rank.forEach((user, i) => {
-            const rate = share[user] * 100;
-            msg += `${i + 1}. ${anonymize(chatData.members[user])} - ${rate.toFixed(2)}%\n`;
-        });
-
-        await this.kakaoClient.sendMsg(
-            msgInfo.chatId,
-            msg.trim(),
-        );
     }
 }
 
