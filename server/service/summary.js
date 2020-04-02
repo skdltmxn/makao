@@ -36,6 +36,14 @@ class SummaryService extends CommandService {
             '여기',
             '저기',
             '거기',
+            '내가',
+            '너가',
+            '그럼',
+            '나도',
+            '너도',
+            '뭐야',
+            '아니',
+            '시바',
         ];
     }
 
@@ -102,7 +110,7 @@ class SummaryService extends CommandService {
         const rank = await this.getSummary(msgInfo, since);
         const summary = Object.keys(rank).sort((a, b) => rank[b] - rank[a]).slice(0, 3);
         const msg = summary.length >= 3
-            ? summary.map((s, i) => `${i + 1}. ${s}`).join('\n')
+            ? summary.map((s, i) => `${i + 1}. ${s} (${rank[s]}회)`).join('\n')
             : '요약할 내용이 없습니다';
 
         await this.kakaoClient.sendMsg(
