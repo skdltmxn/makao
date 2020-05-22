@@ -44,6 +44,7 @@ class SummaryService extends CommandService {
             '뭐야',
             '아니',
             '시바',
+            '이제',
         ];
     }
 

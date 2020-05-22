@@ -193,6 +193,13 @@ class KakaoClient extends EventEmitter2 {
 
         await this.carriageClient.sendMsg(chatId, msg);
     }
+
+    async sendKakaolink(chatId, data) {
+        if (!this.carriageClient.isConnected())
+            throw new Error('not connected to server');
+
+        await this.carriageClient.sendKakaolink(chatId, data);
+    }
 }
 
 module.exports = KakaoClient;
