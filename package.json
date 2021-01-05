@@ -13,7 +13,7 @@
   "author": "skdltmxn",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bson": "^4.0.3",
     "dotenv": "^8.2.0",
     "eventemitter2": "^6.0.0",
